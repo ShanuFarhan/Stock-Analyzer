@@ -286,3 +286,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Made with ❤️ for the financial analysis community**
+#   S t o c k - A n a l y z e r  
+ 
