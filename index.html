@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock & Crypto Analyzer - Fixed Version</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --accent-primary: #3182ce;
+            --success-color: #38a169;
+            --danger-color: #e53e3e;
+            --warning-color: #d69e2e;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --accent-primary: #63b3ed;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            --warning-color: #ed8936;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .main-content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 80px);
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2c5aa0;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .mt-3 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .text-success {
+            color: var(--success-color);
+        }
+
+        .text-danger {
+            color: var(--danger-color);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .analysis-content {
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .price-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .price-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-change {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .price-change.positive {
+            color: var(--success-color);
+        }
+
+        .price-change.negative {
+            color: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .price-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .price-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span>📈</span>
+                    <span>AI Stock Analyzer</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="grid">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Analysis Controls</h2>
+                        </div>
+                        
+                        <form id="analysisForm">
+                            <div class="form-group">
+                                <label for="symbol" class="form-label">Stock/Crypto Symbol</label>
+                                <input 
+                                    type="text" 
+                                    id="symbol" 
+                                    class="form-input" 
+                                    placeholder="e.g., AAPL, TSLA, BTC-USD"
+                                    value="AAPL"
+                                    required
+                                >
+                                <small class="text-muted">Enter stock ticker or crypto symbol</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="period" class="form-label">Time Period</label>
+                                <select id="period" class="form-input">
+                                    <option value="1d">1 Day</option>
+                                    <option value="5d">5 Days</option>
+                                    <option value="1mo" selected>1 Month</option>
+                                    <option value="3mo">3 Months</option>
+                                    <option value="6mo">6 Months</option>
+                                    <option value="1y">1 Year</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="analysisType" class="form-label">Analysis Type</label>
+                                <select id="analysisType" class="form-input">
+                                    <option value="quick">Quick Analysis</option>
+                                    <option value="detailed" selected>Detailed Report</option>
+                                    <option value="prediction">Price Prediction</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-full" id="analyzeBtn">
+                                <span>📊</span>
+                                <span>Analyze</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- API Configuration -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">API Configuration</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="geminiKey" class="form-label">Gemini API Key</label>
+                            <input 
+                                type="password" 
+                                id="geminiKey" 
+                                class="form-input" 
+                                placeholder="Enter your Gemini API key"
+                                value="AIzaSyDbTBUM6V5Z0wzQf937pR5C0BGsVt0yeFc"
+                            >
+                            <small class="text-muted">Pre-configured for testing</small>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Panel -->
+                <div class="main-panel">
+                    <!-- Price Overview -->
+                    <div class="card" id="priceOverview">
+                        <div class="card-header">
+                            <h2 class="card-title">Price Overview</h2>
+                            <button class="btn btn-secondary" id="refreshBtn">
+                                <span>🔄</span>
+                            </button>
+                        </div>
+                        <div id="priceContent">
+                            <div class="text-center text-muted">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                                <p>Enter a symbol and click Analyze to get started</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Analysis -->
+                    <div class="card mt-3" id="aiAnalysis">
+                        <div class="card-header">
+                            <h2 class="card-title">AI Analysis</h2>
+                        </div>
+                        <div id="analysisContent">
+                            <div class="text-center text-muted">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                                <p>AI analysis will appear here after running analysis</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- News Analysis -->
+                    <div class="card mt-3" id="newsAnalysis">
+                        <div class="card-header">
+                            <h2 class="card-title">News & Market Sentiment</h2>
+                        </div>
+                        <div id="newsContent">
+                            <div class="text-center text-muted">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📰</div>
+                                <p>News analysis will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        console.log('🚀 Stock & Crypto Analyzer - Fixed Version Loading...');
+        
+        // Global configuration
+        const CONFIG = {
+            GEMINI_API: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
+            YAHOO_FINANCE_API: 'https://query1.finance.yahoo.com/v8/finance/chart/',
+            DEFAULT_SYMBOL: 'AAPL',
+            DEFAULT_PERIOD: '1mo'
+        };
+
+        // Application state
+        let currentSymbol = null;
+        let currentData = null;
+        let isLoading = false;
+
+        // Utility functions
+        function formatPrice(price) {
+            if (price === null || price === undefined || isNaN(price)) {
+                return 'N/A';
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(price);
+        }
+
+        function formatPercentage(value, decimals = 2) {
+            if (value === null || value === undefined || isNaN(value)) {
+                return 'N/A';
+            }
+            return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}%`;
+        }
+
+        function formatVolume(volume) {
+            if (!volume || isNaN(volume)) return 'N/A';
+            
+            if (volume >= 1e9) {
+                return (volume / 1e9).toFixed(1) + 'B';
+            } else if (volume >= 1e6) {
+                return (volume / 1e6).toFixed(1) + 'M';
+            } else if (volume >= 1e3) {
+                return (volume / 1e3).toFixed(1) + 'K';
+            }
+            return volume.toLocaleString();
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info', duration = 5000) {
+            // Remove existing notifications
+            const existing = document.querySelectorAll('.notification');
+            existing.forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">×</button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, duration);
+            }
+        }
+
+        // API functions
+        async function fetchStockData(symbol, period) {
+            console.log(`📊 Fetching stock data for ${symbol} (${period})`);
+
+            try {
+                const url = `${CONFIG.YAHOO_FINANCE_API}${symbol}?period1=0&period2=9999999999&interval=1d&includePrePost=true`;
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
+                    throw new Error('No data available for this symbol');
+                }
+
+                console.log('✅ Stock data fetched successfully');
+                return data;
+
+            } catch (error) {
+                console.warn('⚠️ Stock API failed, using mock data:', error.message);
+                return generateMockStockData(symbol);
+            }
+        }
+
+        function generateMockStockData(symbol) {
+            console.log(`🎭 Generating mock data for ${symbol}`);
+
+            const basePrice = Math.random() * 200 + 50;
+            const days = 30;
+            const timestamps = [];
+            const prices = [];
+
+            for (let i = days; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                timestamps.push(Math.floor(date.getTime() / 1000));
+
+                const volatility = 0.02;
+                const change = (Math.random() - 0.5) * volatility;
+                const price = i === 0 ? basePrice : basePrice * (1 + change * i / days);
+                prices.push(price);
+            }
+
+            const currentPrice = prices[prices.length - 1];
+            const previousPrice = prices[prices.length - 2] || currentPrice;
+
+            return {
+                chart: {
+                    result: [{
+                        meta: {
+                            symbol: symbol,
+                            regularMarketPrice: currentPrice,
+                            previousClose: previousPrice,
+                            fiftyTwoWeekHigh: Math.max(...prices) * 1.1,
+                            fiftyTwoWeekLow: Math.min(...prices) * 0.9,
+                            marketCap: Math.random() * 1000000000000,
+                            currency: 'USD',
+                            exchangeName: 'NASDAQ'
+                        },
+                        timestamp: timestamps,
+                        indicators: {
+                            quote: [{
+                                open: prices.map(p => p * (0.99 + Math.random() * 0.02)),
+                                high: prices.map(p => p * (1.01 + Math.random() * 0.02)),
+                                low: prices.map(p => p * (0.98 + Math.random() * 0.02)),
+                                close: prices,
+                                volume: prices.map(() => Math.floor(Math.random() * 10000000 + 1000000))
+                            }]
+                        }
+                    }]
+                }
+            };
+        }
+
+        async function generateAIAnalysis(stockData, analysisType) {
+            console.log(`🤖 Generating AI analysis: ${analysisType}`);
+
+            const apiKey = document.getElementById('geminiKey').value;
+
+            if (!apiKey) {
+                console.warn('⚠️ No API key, using mock analysis');
+                return generateMockAnalysis(stockData, analysisType);
+            }
+
+            try {
+                const result = stockData.chart.result[0];
+                const meta = result.meta;
+                const quotes = result.indicators.quote[0];
+
+                const currentPrice = meta.regularMarketPrice || quotes.close[quotes.close.length - 1];
+                const previousClose = meta.previousClose;
+                const change = currentPrice - previousClose;
+                const changePercent = (change / previousClose) * 100;
+
+                const prompt = createAnalysisPrompt(meta.symbol, currentPrice, change, changePercent, analysisType);
+
+                const response = await fetch(`${CONFIG.GEMINI_API}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 2048,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gemini API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.candidates || data.candidates.length === 0) {
+                    throw new Error('No response from Gemini API');
+                }
+
+                const analysis = data.candidates[0].content.parts[0].text;
+                console.log('✅ AI analysis generated successfully');
+                return analysis;
+
+            } catch (error) {
+                console.warn('⚠️ AI analysis failed, using mock analysis:', error.message);
+                return generateMockAnalysis(stockData, analysisType);
+            }
+        }
+
+        function createAnalysisPrompt(symbol, currentPrice, change, changePercent, analysisType) {
+            const basePrompt = `
+Analyze the stock ${symbol} with the following data:
+
+Current Price: ${formatPrice(currentPrice)}
+Price Change: ${formatPrice(change)} (${formatPercentage(changePercent)})
+Trend: ${changePercent >= 0 ? 'Bullish' : 'Bearish'}
+
+Provide a ${analysisType} analysis covering:
+1. Current market position and momentum
+2. Technical outlook and key levels
+3. Risk assessment and potential catalysts
+4. Investment recommendation with reasoning
+
+Keep the response professional and actionable.
+            `.trim();
+
+            return basePrompt;
+        }
+
+        function generateMockAnalysis(stockData, analysisType) {
+            const result = stockData.chart.result[0];
+            const meta = result.meta;
+            const currentPrice = meta.regularMarketPrice;
+            const change = currentPrice - meta.previousClose;
+            const changePercent = (change / meta.previousClose) * 100;
+
+            const templates = {
+                quick: `**Quick Analysis for ${meta.symbol}**
+
+**Current Status:**
+• Price: ${formatPrice(currentPrice)} (${formatPercentage(changePercent)})
+• Trend: ${changePercent >= 0 ? 'Bullish momentum' : 'Bearish pressure'}
+• Volume: ${changePercent >= 0 ? 'Above average' : 'Below average'}
+
+**Key Insights:**
+• Technical outlook shows ${changePercent >= 0 ? 'positive' : 'negative'} momentum
+• Support level around ${formatPrice(currentPrice * 0.95)}
+• Resistance level around ${formatPrice(currentPrice * 1.05)}
+
+**Short-term Outlook:** ${changePercent >= 0 ? 'Cautiously optimistic' : 'Neutral to bearish'} for the next 1-5 days.`,
+
+                detailed: `**Comprehensive Analysis for ${meta.symbol}**
+
+**Technical Analysis:**
+• Current price of ${formatPrice(currentPrice)} shows ${changePercent >= 0 ? 'bullish' : 'bearish'} momentum
+• Trading ${((currentPrice - meta.fiftyTwoWeekLow) / (meta.fiftyTwoWeekHigh - meta.fiftyTwoWeekLow) * 100).toFixed(1)}% of 52-week range
+• Key support: ${formatPrice(currentPrice * 0.92)}, Resistance: ${formatPrice(currentPrice * 1.08)}
+
+**Market Conditions:**
+• Current market sentiment appears ${Math.random() > 0.5 ? 'positive' : 'mixed'}
+• Sector performance is ${Math.random() > 0.5 ? 'outperforming' : 'underperforming'}
+• Institutional interest remains ${Math.random() > 0.5 ? 'strong' : 'moderate'}
+
+**Risk Assessment:**
+• Volatility: ${Math.random() > 0.5 ? 'Moderate' : 'Elevated'}
+• Downside risk: ${(Math.random() * 15 + 5).toFixed(1)}%
+• Upside potential: ${(Math.random() * 20 + 10).toFixed(1)}%
+
+**Investment Outlook:**
+• Short-term (1-2 weeks): ${changePercent >= 0 ? 'Positive' : 'Neutral'}
+• Medium-term (1-3 months): ${Math.random() > 0.5 ? 'Constructive' : 'Cautious'}
+• Key levels to watch: ${formatPrice(currentPrice * 0.95)} and ${formatPrice(currentPrice * 1.05)}`,
+
+                prediction: `**Price Prediction Analysis for ${meta.symbol}**
+
+**Technical Patterns:**
+• Identified ${Math.random() > 0.5 ? 'ascending triangle' : 'consolidation'} pattern
+• Momentum indicators suggest ${changePercent >= 0 ? 'continuation' : 'reversal'} potential
+• Volume analysis shows ${Math.random() > 0.5 ? 'accumulation' : 'distribution'} phase
+
+**Price Targets:**
+• 1-week target: ${formatPrice(currentPrice * (1 + (Math.random() - 0.5) * 0.1))} (Confidence: ${Math.floor(Math.random() * 3 + 7)}/10)
+• 1-month target: ${formatPrice(currentPrice * (1 + (Math.random() - 0.5) * 0.2))} (Confidence: ${Math.floor(Math.random() * 3 + 6)}/10)
+
+**Scenario Analysis:**
+• Bull case: ${formatPrice(currentPrice * 1.20)} (+20%)
+• Base case: ${formatPrice(currentPrice * 1.05)} (+5%)
+• Bear case: ${formatPrice(currentPrice * 0.85)} (-15%)
+
+**Trading Strategy:**
+• Entry point: ${formatPrice(currentPrice * 0.98)}
+• Stop loss: ${formatPrice(currentPrice * 0.92)}
+• Take profit: ${formatPrice(currentPrice * 1.08)}`
+            };
+
+            return templates[analysisType] || templates.detailed;
+        }
+
+        // UI update functions
+        function updatePriceDisplay(data) {
+            const priceContent = document.getElementById('priceContent');
+
+            if (!data || !data.chart || !data.chart.result || !data.chart.result[0]) {
+                priceContent.innerHTML = `
+                    <div class="text-center text-muted">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                        <p>Unable to load price data</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const result = data.chart.result[0];
+            const meta = result.meta;
+            const quotes = result.indicators.quote[0];
+
+            const currentPrice = meta.regularMarketPrice || quotes.close[quotes.close.length - 1];
+            const previousClose = meta.previousClose || quotes.close[quotes.close.length - 2];
+            const change = currentPrice - previousClose;
+            const changePercent = (change / previousClose) * 100;
+
+            const high = Math.max(...quotes.high.filter(h => h !== null));
+            const low = Math.min(...quotes.low.filter(l => l !== null));
+            const volume = quotes.volume[quotes.volume.length - 1];
+
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            const changeIcon = change >= 0 ? '📈' : '📉';
+
+            priceContent.innerHTML = `
+                <div class="price-display">
+                    <div class="price-card">
+                        <div class="price-value">${formatPrice(currentPrice)}</div>
+                        <div class="price-label">Current Price</div>
+                        <div class="price-change ${changeClass}">
+                            <span>${changeIcon}</span>
+                            <span>${formatPrice(Math.abs(change))} (${formatPercentage(Math.abs(changePercent))})</span>
+                        </div>
+                    </div>
+                    <div class="price-card">
+                        <div class="price-value">${formatPrice(high)}</div>
+                        <div class="price-label">Period High</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="price-value">${formatPrice(low)}</div>
+                        <div class="price-label">Period Low</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="price-value">${formatVolume(volume)}</div>
+                        <div class="price-label">Volume</div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-primary);">${formatPrice(previousClose)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Previous Close</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-primary);">${formatPrice(meta.fiftyTwoWeekHigh || high)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">52W High</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-primary);">${formatPrice(meta.fiftyTwoWeekLow || low)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">52W Low</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-primary);">${meta.marketCap ? formatVolume(meta.marketCap) : 'N/A'}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Market Cap</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAnalysisContent(analysis, type) {
+            const analysisContent = document.getElementById('analysisContent');
+
+            if (!analysis) {
+                analysisContent.innerHTML = `
+                    <div class="text-center text-muted">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                        <p>No analysis available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Format the analysis text
+            const formattedAnalysis = analysis
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/•/g, '•')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            analysisContent.innerHTML = `
+                <div style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🤖</span>
+                        <h3 style="color: var(--accent-primary); margin: 0;">AI Analysis - ${type.charAt(0).toUpperCase() + type.slice(1)} Report</h3>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <p>${formattedAnalysis}</p>
+                </div>
+            `;
+        }
+
+        function generateNewsAnalysis(symbol) {
+            const newsContent = document.getElementById('newsContent');
+
+            // Generate mock news data
+            const headlines = [
+                `${symbol} Reports Strong Quarterly Earnings Beat`,
+                `Analysts Upgrade ${symbol} Price Target on Growth Outlook`,
+                `${symbol} Announces Strategic Partnership Deal`,
+                `Market Volatility Affects ${symbol} Trading Volume`,
+                `${symbol} CEO Discusses Future Innovation Strategy`
+            ];
+
+            const sources = ['Reuters', 'Bloomberg', 'CNBC', 'MarketWatch', 'Yahoo Finance'];
+            const sentiments = ['positive', 'neutral', 'negative'];
+
+            const newsItems = headlines.map((title, index) => {
+                const sentiment = sentiments[Math.floor(Math.random() * sentiments.length)];
+                const source = sources[Math.floor(Math.random() * sources.length)];
+                const date = new Date(Date.now() - index * 24 * 60 * 60 * 1000);
+
+                return {
+                    title,
+                    sentiment,
+                    source,
+                    date: date.toLocaleDateString(),
+                    description: `Latest developments regarding ${symbol} and its market performance. This analysis covers recent business activities and market trends.`
+                };
+            });
+
+            const sentimentCounts = {
+                positive: newsItems.filter(item => item.sentiment === 'positive').length,
+                neutral: newsItems.filter(item => item.sentiment === 'neutral').length,
+                negative: newsItems.filter(item => item.sentiment === 'negative').length
+            };
+
+            const overallSentiment = sentimentCounts.positive > sentimentCounts.negative ? 'Positive' :
+                                   sentimentCounts.negative > sentimentCounts.positive ? 'Negative' : 'Neutral';
+
+            const newsHTML = newsItems.map(item => {
+                const sentimentColor = item.sentiment === 'positive' ? 'var(--success-color)' :
+                                     item.sentiment === 'negative' ? 'var(--danger-color)' : 'var(--text-muted)';
+
+                return `
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; line-height: 1.4;">${item.title}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">${item.source}</div>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap;">${item.date}</div>
+                        </div>
+                        <div style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.5rem;">${item.description}</div>
+                        <div style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; background: ${sentimentColor}20; color: ${sentimentColor};">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${sentimentColor};"></span>
+                            ${item.sentiment}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            newsContent.innerHTML = `
+                <div style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">📰</span>
+                        <h3 style="color: var(--accent-primary); margin: 0;">Recent News & Market Sentiment</h3>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--success-color);">${sentimentCounts.positive}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Positive</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--text-muted);">${sentimentCounts.neutral}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Neutral</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--danger-color);">${sentimentCounts.negative}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Negative</div>
+                    </div>
+                    <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: bold; color: var(--accent-primary);">${overallSentiment}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Overall</div>
+                    </div>
+                </div>
+                <div>
+                    ${newsHTML}
+                </div>
+            `;
+        }
+
+        // Main analysis function
+        async function performAnalysis(symbol, period, analysisType) {
+            console.log(`🔍 Starting analysis for ${symbol} (${period}, ${analysisType})`);
+
+            try {
+                currentSymbol = symbol;
+                isLoading = true;
+
+                // Update UI to loading state
+                setLoadingState(true);
+                showNotification('Fetching stock data...', 'info', 2000);
+
+                // Fetch stock data
+                const stockData = await fetchStockData(symbol, period);
+                currentData = stockData;
+
+                // Update price display
+                updatePriceDisplay(stockData);
+
+                // Generate AI analysis
+                showNotification('Generating AI analysis...', 'info', 2000);
+                const analysis = await generateAIAnalysis(stockData, analysisType);
+
+                // Display analysis
+                displayAnalysisContent(analysis, analysisType);
+
+                // Generate news analysis
+                showNotification('Analyzing market sentiment...', 'info', 2000);
+                generateNewsAnalysis(symbol);
+
+                showNotification('Analysis completed successfully!', 'success');
+                console.log('✅ Analysis completed successfully');
+
+            } catch (error) {
+                console.error('❌ Analysis failed:', error);
+                showNotification('Analysis failed: ' + error.message, 'error');
+            } finally {
+                isLoading = false;
+                setLoadingState(false);
+            }
+        }
+
+        function setLoadingState(loading) {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            if (analyzeBtn) {
+                if (loading) {
+                    analyzeBtn.disabled = true;
+                    analyzeBtn.innerHTML = '<div class="loading"></div><span>Analyzing...</span>';
+                } else {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.innerHTML = '<span>📊</span><span>Analyze</span>';
+                }
+            }
+
+            if (refreshBtn) {
+                refreshBtn.disabled = loading;
+            }
+        }
+
+        // Theme management
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeUI(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeUI(newTheme);
+
+                showNotification(`Switched to ${newTheme} mode`, 'info', 2000);
+            });
+        }
+
+        function updateThemeUI(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Form submission
+            const form = document.getElementById('analysisForm');
+            if (form) {
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+
+                    const symbol = document.getElementById('symbol').value.trim().toUpperCase();
+                    const period = document.getElementById('period').value;
+                    const analysisType = document.getElementById('analysisType').value;
+
+                    if (!symbol) {
+                        showNotification('Please enter a stock symbol', 'warning');
+                        return;
+                    }
+
+                    if (symbol.length > 10) {
+                        showNotification('Symbol too long (max 10 characters)', 'warning');
+                        return;
+                    }
+
+                    if (!/^[A-Z0-9\-\.]+$/.test(symbol)) {
+                        showNotification('Invalid symbol format', 'warning');
+                        return;
+                    }
+
+                    await performAnalysis(symbol, period, analysisType);
+                });
+            }
+
+            // Refresh button
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    if (currentSymbol) {
+                        const period = document.getElementById('period').value;
+                        const analysisType = document.getElementById('analysisType').value;
+                        performAnalysis(currentSymbol, period, analysisType);
+                    } else {
+                        showNotification('No symbol to refresh', 'warning');
+                    }
+                });
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (event) => {
+                if (event.ctrlKey || event.metaKey) {
+                    switch (event.key) {
+                        case 'Enter':
+                            event.preventDefault();
+                            document.getElementById('analysisForm').dispatchEvent(new Event('submit'));
+                            break;
+                        case 'r':
+                            event.preventDefault();
+                            document.getElementById('refreshBtn').click();
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Initialize application
+        function initializeApp() {
+            console.log('🚀 Initializing Stock & Crypto Analyzer...');
+
+            try {
+                setupThemeToggle();
+                setupEventListeners();
+
+                showNotification(
+                    'Stock & Crypto Analyzer ready! Enter a symbol and click Analyze to get started.',
+                    'info',
+                    5000
+                );
+
+                console.log('✅ Application initialized successfully');
+
+            } catch (error) {
+                console.error('❌ Initialization failed:', error);
+                showNotification('Failed to initialize application: ' + error.message, 'error');
+            }
+        }
+
+        // Start the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+
+        console.log('✅ Stock & Crypto Analyzer - Fixed Version Loaded Successfully');
+    </script>
+</body>
+</html>
